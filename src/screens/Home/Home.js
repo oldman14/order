@@ -15,11 +15,14 @@ const listTable = [
   {id: 8, tableName: 'L8'},
 ];
 
-const Home = () => {
+const Home = ({navigation }) => {
   const widthItem = width / 3;
 
   const renderTable = ({item, index}) => {
     return (
+      <TouchableOpacity
+        onPress={()=>navigation.navigate('Dish',{id: item.id})}
+      >
       <View>
         <View style={styles.tableItem}>
           <TouchableOpacity>
@@ -27,6 +30,7 @@ const Home = () => {
           </TouchableOpacity>
         </View>
       </View>
+      </TouchableOpacity>
     );
   };
   return (
