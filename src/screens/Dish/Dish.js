@@ -203,7 +203,7 @@ const Dish = ({route, navigation}) => {
   const renderBotSheetCart = () => {
     const renderItemCart =({item})=>{
       return(
-      <View style={{flexDirection: 'row',paddingHorizontal: 12, paddingVertical:8, borderBottomColor: '#ddd', borderBottomWidth: 1}}>
+      <View style={{flexDirection: 'row',paddingHorizontal: 15, paddingVertical:8, borderBottomColor: '#ddd`', borderBottomWidth: 0.5}}>
         <View style={styles.cart_section1_cartItem}>
           <Text style={{fontSize: SIZES.body2, fontWeight: 'bold'}}>{item.quantity +"x"+" "+ item.product.productName}</Text>
           <Text>Vừa</Text>
@@ -233,9 +233,17 @@ const Dish = ({route, navigation}) => {
           {dataCart[0] != undefined ?  <FlatList
               data={dataCart[0].listProduct}
               keyExtractor={item=>item.product.id}
-              renderItem={renderItemCart}/> : <View></View>}
-         
-         
+              renderItem={renderItemCart}/> : <View></View>}  
+        </View>
+        <View  style={styles.cart_acceptContainer}>
+          <View style={{justifyContent: 'center', flex: 8, paddingHorizontal:10}}>
+            <Text style={styles.orderTitle}>Giỏ hàng hiện tại</Text>
+            <Text style={styles.orderText}>172.000d</Text>
+          </View>
+          <TouchableOpacity style={{height: 40, alignSelf: 'center'}}>
+            <Text style={styles.cart_btnPay}>Thanh Toán</Text>
+
+          </TouchableOpacity>
         </View>
       </View>
     );
@@ -433,6 +441,7 @@ const styles = StyleSheet.create({
     color: '#fff',
   },
   cart_container: {
+    position: 'absolute',
     width: SIZES.width,
     height: SIZES.height,
   },
@@ -476,6 +485,33 @@ const styles = StyleSheet.create({
   cart_section1_cartItem:{
     flex: 8, 
     flexDirection: 'column'
+  },
+  cart_acceptContainer: {
+    flexDirection: 'row',
+    width: SIZES.width - 20,
+    height: 80,
+    marginHorizontal: 10,
+    backgroundColor: '#f90',
+    position: 'absolute',
+    bottom: 20,
+    right: 0,
+    left: 0,
+    borderRadius: 3,
+  },
+  cart_btnPay:{
+    flex: 2.5,
+    alignSelf: 'center',
+    textAlign: 'center',
+    textAlignVertical: 'center',
+    height: 40,
+    marginHorizontal: 10,
+    paddingHorizontal: 5,
+    paddingVertical: 5,
+    borderRadius: 10,
+    backgroundColor:'#fff',
+    color: '#f90',
+    fontWeight: 'bold',
+    fontSize: SIZES.body4,
   }
 });
 
