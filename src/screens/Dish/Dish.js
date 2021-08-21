@@ -1,5 +1,5 @@
 import {BottomSheetModal, BottomSheetModalProvider} from '@gorhom/bottom-sheet';
-import React, {useState, useRef, useMemo, useCallback} from 'react';
+import React, {useState, useRef, useMemo, useCallback, useEffect} from 'react';
 import {
   View,
   Text,
@@ -9,97 +9,102 @@ import {
   Image,
   TouchableOpacity,
   Button,
+  Modal,
 } from 'react-native';
 import {SIZES, COLORS, FONTS} from '../../constants';
 import RBSheet from 'react-native-raw-bottom-sheet';
 import BottomSheet from 'reanimated-bottom-sheet';
-import { useDispatch, useSelector } from 'react-redux';
-import { addCart } from '../../../redux/actions/cartItem';
-
+import {useDispatch, useSelector} from 'react-redux';
+import {addCart} from '../../../redux/actions/cartItem';
 const DATA2 = [
-    {
-      id: 1,
-      productName: 'Cơm tấm',
-      image:
-        'https://cdn.daynauan.info.vn/wp-content/uploads/2019/05/com-tam-la-mon-an-binh-dan.jpg',
-    },
-    {
-      id: 2,
-      productName: 'Cơm cá kho',
-      image:
-        'https://cdn.daynauan.info.vn/wp-content/uploads/2019/05/com-tam-la-mon-an-binh-dan.jpg',
-    },
-    {
-      id: 3,
-      productName: 'Cơm cá chiên',
-      image:
-        'http://f.imgs.vietnamnet.vn/2017/12/12/15/khoi-mat-cong-ra-quan-vi-cong-thuc-com-tam-chuan-vi-nhat-ngay-day.jpg',
-    },
-    {
-      id: 4,
-      productName: 'Cơm tấm',
-      image:
-        'https://cdn.daynauan.info.vn/wp-content/uploads/2019/05/com-tam-la-mon-an-binh-dan.jpg',
-    },
-    {
-      id: 5,
-      productName: 'Cơm cá kho',
-      image:
-        'https://cdn.daynauan.info.vn/wp-content/uploads/2019/05/com-tam-la-mon-an-binh-dan.jpg',
-    },
-    {
-      id: 6,
-      productName: 'Cơm cá chiên',
-      image:
-        'http://f.imgs.vietnamnet.vn/2017/12/12/15/khoi-mat-cong-ra-quan-vi-cong-thuc-com-tam-chuan-vi-nhat-ngay-day.jpg',
-    },
-    {
-      id: 7,
-      productName: 'Cơm tấm',
-      image:
-        'https://cdn.daynauan.info.vn/wp-content/uploads/2019/05/com-tam-la-mon-an-binh-dan.jpg',
-    },
-    {
-      id: 8,
-      productName: 'Cơm cá kho',
-      image:
-        'https://cdn.daynauan.info.vn/wp-content/uploads/2019/05/com-tam-la-mon-an-binh-dan.jpg',
-    },
-    {
-      id: 9,
-      productName: 'Cơm cá chiên',
-      image:
-        'http://f.imgs.vietnamnet.vn/2017/12/12/15/khoi-mat-cong-ra-quan-vi-cong-thuc-com-tam-chuan-vi-nhat-ngay-day.jpg',
-    },
-  ];
+  {
+    id: 1,
+    productName: 'Cơm tấm',
+    image:
+      'https://cdn.daynauan.info.vn/wp-content/uploads/2019/05/com-tam-la-mon-an-binh-dan.jpg',
+  },
+  {
+    id: 2,
+    productName: 'Cơm cá kho',
+    image:
+      'https://cdn.daynauan.info.vn/wp-content/uploads/2019/05/com-tam-la-mon-an-binh-dan.jpg',
+  },
+  {
+    id: 3,
+    productName: 'Cơm cá chiên',
+    image:
+      'http://f.imgs.vietnamnet.vn/2017/12/12/15/khoi-mat-cong-ra-quan-vi-cong-thuc-com-tam-chuan-vi-nhat-ngay-day.jpg',
+  },
+  {
+    id: 4,
+    productName: 'Cơm tấm',
+    image:
+      'https://cdn.daynauan.info.vn/wp-content/uploads/2019/05/com-tam-la-mon-an-binh-dan.jpg',
+  },
+  {
+    id: 5,
+    productName: 'Cơm cá kho',
+    image:
+      'https://cdn.daynauan.info.vn/wp-content/uploads/2019/05/com-tam-la-mon-an-binh-dan.jpg',
+  },
+  {
+    id: 6,
+    productName: 'Cơm cá chiên',
+    image:
+      'http://f.imgs.vietnamnet.vn/2017/12/12/15/khoi-mat-cong-ra-quan-vi-cong-thuc-com-tam-chuan-vi-nhat-ngay-day.jpg',
+  },
+  {
+    id: 7,
+    productName: 'Cơm tấm',
+    image:
+      'https://cdn.daynauan.info.vn/wp-content/uploads/2019/05/com-tam-la-mon-an-binh-dan.jpg',
+  },
+  {
+    id: 8,
+    productName: 'Cơm cá kho',
+    image:
+      'https://cdn.daynauan.info.vn/wp-content/uploads/2019/05/com-tam-la-mon-an-binh-dan.jpg',
+  },
+  {
+    id: 9,
+    productName: 'Cơm cá chiên',
+    image:
+      'http://f.imgs.vietnamnet.vn/2017/12/12/15/khoi-mat-cong-ra-quan-vi-cong-thuc-com-tam-chuan-vi-nhat-ngay-day.jpg',
+  },
+];
 
 const Dish = ({route, navigation}) => {
   const {id} = route.params;
-  console.log("log id", id)
+  console.log('log id', id);
   const [quantity, setQuantity] = useState(1);
-  const [cartOrder, setCartOrder] = useState([]);
+  const [dataOrder, setDataOrder] = useState();
   const [dishBottom, setDishBottom] = useState(null);
   const refRBSheet = useRef();
+  const refRBSheet2 = useRef();
   const bottomSheetModalRef = useRef(null);
-  const [data, setData] = useState(DATA2);
-   const dispatch = useDispatch();
-   const state = useSelector(state => state.cart)
-   console.log("log state",state)
-   const addItem = () =>{
-    const cart = {product: dishBottom, quantity : quantity, id: id}
+  const dispatch = useDispatch();
+  const state = useSelector(state => state.cart);
+  console.log('log state', state);
+  const [modalVisible, setModalVisible] = useState(false);
+  const dataCart = state.filter(item => item.id === id);
+  console.log('logdatacart', dataCart[0]);
+  const addItem = () => {
+    const cart = {
+      id: id,
+      listProduct: [{product: dishBottom, quantity: quantity}],
+    };
     dispatch(addCart(cart));
-  } 
+  };
   // variables
   const snapPoints = useMemo(() => ['25%', '50%'], []);
-
+  useEffect(() => {
+    if (dataCart[0] != undefined) {
+      setModalVisible(false);
+    } else {
+      setModalVisible(true);
+    }
+  }, [dataCart]);
   // callbacks
-  const handlePresentModalPress = useCallback(() => {
-    bottomSheetModalRef.current?.present();
-  }, []);
-  const handleSheetChanges = useCallback((index: number) => {
-    console.log('handleSheetChanges', index);
-  }, []);
-  
   imageDef =
     'http://f.imgs.vietnamnet.vn/2017/12/12/15/khoi-mat-cong-ra-quan-vi-cong-thuc-com-tam-chuan-vi-nhat-ngay-day.jpg';
   const renderBottomButton = () => {
@@ -122,11 +127,11 @@ const Dish = ({route, navigation}) => {
         <View style={{justifyContent: 'center'}}>
           <Text
             style={{
-                textAlign: 'center',
-                width: 30,
+              textAlign: 'center',
+              width: 30,
               fontSize: SIZES.h2,
               color: COLORS.black,
-              marginHorizontal:20,
+              marginHorizontal: 20,
               marginVertical: SIZES.base,
             }}>
             {quantity}
@@ -178,22 +183,70 @@ const Dish = ({route, navigation}) => {
             flexDirection: 'column',
             height: SIZES.height / 7,
           }}>
-          <View style={{flex: 1, alignSelf:'center'}}>{renderBottomButton()}</View>
+          <View style={{flex: 1, alignSelf: 'center'}}>
+            {renderBottomButton()}
+          </View>
 
           <TouchableOpacity
-          onPress={()=>addItem()}
-            style={{flex: 1, justifyContent: 'center', backgroundColor: '#f90'}}>
-                <Text style={styles.textTouch}>Thêm món</Text>
-            </TouchableOpacity>
+            onPress={() => addItem()}
+            style={{
+              flex: 1,
+              justifyContent: 'center',
+              backgroundColor: '#f90',
+            }}>
+            <Text style={styles.textTouch}>Thêm món</Text>
+          </TouchableOpacity>
         </View>
       </View>
     );
   };
+  const renderBotSheetCart = () => {
+    const renderItemCart =({item})=>{
+      return(
+      <View style={{flexDirection: 'row',paddingHorizontal: 12, paddingVertical:8, borderBottomColor: '#ddd', borderBottomWidth: 1}}>
+        <View style={styles.cart_section1_cartItem}>
+          <Text style={{fontSize: SIZES.body2, fontWeight: 'bold'}}>{item.quantity +"x"+" "+ item.product.productName}</Text>
+          <Text>Vừa</Text>
+        </View>
+        <View style={{justifyContent:'space-between'}}>
+        <Text style={{fontSize: SIZES.body2}}>88.000đ</Text>
+        </View>
+      </View>)
+    }
+
+    return (
+      <View style={styles.cart_container}>
+        <View style={styles.cart_viewCancel}>
+          <Text style={styles.cart_title}>XÁC NHẬN ĐƠN HÀNG</Text>
+          {/* <Image
+            style={styles.cart_cancel}
+            source={require('../../assets/images/cancel.png')}
+          /> */}
+        </View>
+        <View style={styles.cart_section1}>
+          <View style={styles.cart_titleSection}>
+            <Text style={styles.cart_titleListOrder}>Các sản phẩm đã chọn</Text>
+            <TouchableOpacity>
+            <Text style={styles.cart_addTitle}>Thêm</Text>
+            </TouchableOpacity>
+          </View>
+          {dataCart[0] != undefined ?  <FlatList
+              data={dataCart[0].listProduct}
+              keyExtractor={item=>item.product.id}
+              renderItem={renderItemCart}/> : <View></View>}
+         
+         
+        </View>
+      </View>
+    );
+  };
+
   const openBottomSheet = item => {
     setDishBottom(item);
     refRBSheet.current.open();
   };
   const renderItems = ({item}) => {
+    console.log("object", item)
     return (
       <TouchableOpacity onPress={() => openBottomSheet(item)}>
         <View style={{flex: 1}}>
@@ -211,25 +264,9 @@ const Dish = ({route, navigation}) => {
       </TouchableOpacity>
     );
   };
-  const renderContent = () => (
-    <View
-      style={{
-        backgroundColor: 'white',
-        padding: 16,
-        height: 450,
-      }}>
-      <Text>Swipe down to close</Text>
-    </View>
-  );
+
   return (
     <View style={styles.container}>
-      {/* <SectionList
-        sections={DATA}
-        renderItem={renderItems}
-        renderSectionHeader={({section: {typeName}}) => (
-          <Text style={styles.header}>{typeName}</Text>
-        )}
-      /> */}
       <FlatList
         data={DATA2}
         keyExtractor={item => item.id}
@@ -240,25 +277,52 @@ const Dish = ({route, navigation}) => {
       <RBSheet
         ref={refRBSheet}
         closeOnDragDown={true}
-        closeOnPressMask={false}
+        closeOnPressMask={true}
         customStyles={{
           wrapper: {
             backgroundColor: 'transparent',
           },
-          draggableIcon: {
-            backgroundColor: '#000',
-          },
         }}>
         {renderBottomSheet()}
       </RBSheet>
+      <RBSheet
+        ref={refRBSheet2}
+        height={SIZES.height}
+        closeOnDragDown={false}
+        closeOnPressMask={true}
+        customStyles={{
+          wrapper: {
+            backgroundColor: 'transparent',
+          },
+        }}>
+        {renderBotSheetCart()}
+      </RBSheet>
+      <TouchableOpacity
+        onPress={() => refRBSheet2.current.open()}
+        style={{flex: 1}}>
+        <View
+          style={modalVisible == true ? styles.modalOrder : styles.modalOrder2}>
+          <View style={styles.viewImageOrder}>
+            <Image
+              style={styles.imageOrder}
+              source={require('../../assets/images/icons8-fondue-50.png')}
+            />
+          </View>
+          <View style={{justifyContent: 'center'}}>
+            <Text style={styles.orderTitle}>Giỏ hàng hiện tại</Text>
+            <Text style={styles.orderText}>172.000d</Text>
+          </View>
+        </View>
+      </TouchableOpacity>
     </View>
   );
 };
-
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    width: SIZES.width,
+    height: SIZES.height,
     backgroundColor: '#eee',
+    position: 'absolute',
   },
   header: {
     fontSize: 32,
@@ -325,9 +389,93 @@ const styles = StyleSheet.create({
     marginHorizontal: (SIZES.width * 0.1) / 8,
   },
   textTouch: {
-      textAlign: 'center',
-      fontSize: SIZES.body2,
-      color: COLORS.white
+    textAlign: 'center',
+    fontSize: SIZES.body2,
+    color: COLORS.white,
+  },
+  modalOrder: {
+    flexDirection: 'row',
+    width: SIZES.width - 20,
+    height: 80,
+    marginHorizontal: 10,
+    backgroundColor: '#f90',
+    position: 'absolute',
+    bottom: -100,
+    right: 0,
+    left: 0,
+    borderRadius: 3,
+  },
+  modalOrder2: {
+    flexDirection: 'row',
+    width: SIZES.width - 20,
+    height: 80,
+    marginHorizontal: 10,
+    backgroundColor: '#f90',
+    position: 'absolute',
+    bottom: 20,
+    right: 0,
+    left: 0,
+    borderRadius: 3,
+  },
+  viewImageOrder: {
+    justifyContent: 'center',
+    padding: 10,
+  },
+  imageOrder: {
+    alignContent: 'center',
+  },
+  orderTitle: {
+    fontSize: SIZES.body2,
+    color: '#fff',
+  },
+  orderText: {
+    fontSize: SIZES.body3,
+    color: '#fff',
+  },
+  cart_container: {
+    width: SIZES.width,
+    height: SIZES.height,
+  },
+  cart_cancel: {
+    width: 18,
+    height: 18,
+    marginHorizontal: 8,
+    alignSelf: 'center',
+    right: 0,
+  },
+  cart_viewCancel: {
+    flexDirection: 'row',
+    borderBottomWidth: 1,
+
+    borderBottomColor: '#eee',
+    paddingVertical: 15,
+    justifyContent: 'center',
+  },
+  cart_title: {
+    fontSize: SIZES.h3,
+  },
+  cart_section1: {
+    width: SIZES.width,
+  },
+  cart_titleSection: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: 14,
+    paddingVertical:5
+  },
+  cart_titleListOrder: {
+    fontSize: SIZES.h3,
+    fontWeight: 'bold'
+  },
+  cart_addTitle: {
+    padding:5,
+    backgroundColor: '#FFA54F',
+    borderRadius: 5,
+    color: '#fff'
+  },
+  cart_section1_cartItem:{
+    flex: 8, 
+    flexDirection: 'column'
   }
 });
 
