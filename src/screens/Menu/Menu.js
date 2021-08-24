@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useRef} from 'react';
 import {
   View,
   Text,
@@ -13,14 +13,17 @@ import {
 import {SIZES} from '../../constants';
 import {utils} from '@react-native-firebase/app';
 import storage from '@react-native-firebase/storage';
-import {launchImageLibrary} from 'react-native-image-picker';
+import {launchImageLibrary, launchCamera} from 'react-native-image-picker';
+import RBSheet from 'react-native-raw-bottom-sheet';
 const Menu = () => {
   const [text, onChangeText] = useState();
   const [img, setImg] = useState(null);
   const [image, setImage] = useState(null);
   const [isLoading, setIsLoading] = useState();
   const [tranfers, setTranfers] = useState();
-  const openCamera = () => {
+  const refRBSheet = useRef();
+  const openLibary = () => {
+    refRBSheet.current.close();
     const option = {
       includeBase64: true,
       mediaType: 'photo',
@@ -48,6 +51,36 @@ const Menu = () => {
       }
     });
   };
+  const openCamera= ()=>{
+    refRBSheet.current.close();
+    const option = {
+      includeBase64: true,
+      mediaType: 'photo',
+    };
+    launchCamera(option, res => {
+      console.log(res);
+      if (res.didCancel) {
+        console.log('Didcancle');
+      }
+      if (res.errorCode) {
+        console.log('errorCode');
+      }
+      if (res.errorMessage) {
+        console.log('error Message');
+      } else {
+        console.log(res.assets);
+        if(res.assets!= undefined){
+            setImg(res.assets[0].uri);
+            const imageSource = {
+              uri: 'data:image/jpeg;base64,' + res.assets[0].base64,
+            };
+            setImage(imageSource);
+        }
+     
+      }
+    });
+
+  }
   const upPhoto = async () => {
     setIsLoading(true);
     setTranfers(0);
@@ -74,6 +107,22 @@ const Menu = () => {
     }
     setImg(null)
   };
+  const renderBottomSheet =()=>{
+
+    return(
+        <View>
+            <TouchableOpacity style={styles.imageBottomSheet} onPress={()=>openLibary()}>
+                <Text style={styles.imagePickTitle}>Take a Photo</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.imageBottomSheet} onPress={()=>openCamera()}>
+                <Text style={styles.imagePickTitle}>OpenCamera</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.imageBottomSheet} onPress={()=>refRBSheet.current.close()}>
+                <Text style={styles.imagePickTitle}>Cancel</Text>
+            </TouchableOpacity>
+        </View>
+    )
+  }
   return (
     <View style={styles.container}>
       <View style={styles.section}>
@@ -96,20 +145,21 @@ const Menu = () => {
         <View style={styles.section_box}>
           <Text style={styles.title}>Ảnh</Text>
           <View>
-            <Text>Thêm ảnh sản phẩm</Text>
             {isLoading ? (
               <View>
                 <Text>{tranfers} % complete</Text>
                 <ActivityIndicator size="large" color="#f90" />
               </View>
             ) : (
-                <TouchableOpacity onPress={() => openCamera()}>
-              <Image style={{width: 50, height: 50}} source={image} />
+                <TouchableOpacity onPress={() => refRBSheet.current.open()}>
+                  <View style={styles.imageProductBox}>
+                  <Image style={styles.imageProduct} source={image}/>
+                  <View style={styles.imageIconBox}>
+                      <Image style={styles.imageIcon} source={require('../../assets/images/icons8-camera-48.png')}/>
+                  </View>
+                  </View>
               </TouchableOpacity>
             )}
-            <TouchableOpacity onPress={()=>openCamera()}>
-                <Text>Chọn ảnh</Text>
-            </TouchableOpacity>
           </View>
         </View>
         <View style={styles.section_box}>
@@ -121,6 +171,17 @@ const Menu = () => {
           />
         </View>
       </View>
+      <RBSheet
+        ref={refRBSheet}
+        closeOnDragDown={true}
+        closeOnPressMask={true}
+        customStyles={{
+          wrapper: {
+            backgroundColor: 'transparent',
+          },
+        }}>
+        {renderBottomSheet()}
+      </RBSheet>
     </View>
   );
 };
@@ -146,5 +207,48 @@ const styles = StyleSheet.create({
     borderColor: '#ccc',
     borderRadius: 10,
   },
+  imageBottomSheet:{
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical:10,
+    borderColor: '#eee',
+    borderWidth: 1
+  },
+  imagePickTitle: {
+    fontSize: SIZES.body2
+  },
+  imageProduct: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+  },
+  imageProductBox: {
+    alignSelf: 'center',
+    borderColor: '#000',
+    borderWidth: 1,
+    width: 100,
+    height: 100,
+    borderRadius: 50  ,
+  },
+  imageIcon:{
+    width: 15,
+    height: 15,
+  },
+  imageIconBox: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 50,
+    width: 25,
+    height: 25,
+    backgroundColor: '#fff',
+    position: 'absolute',
+    bottom: 5,
+    right: 5,
+    borderWidth: 0.5,
+    borderColor: '#eee'
+  },
+  imagePick:{
+    position: 'absolute'
+  }
 });
 export default Menu;
