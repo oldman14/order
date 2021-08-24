@@ -11,7 +11,6 @@ const tabs = () => {
     return (
         <Tab.Navigator
         screenOptions={({ route }) => ({
-       
           tabBarActiveTintColor: 'tomato',
           tabBarInactiveTintColor: 'gray',
         })}
