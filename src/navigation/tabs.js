@@ -9,7 +9,13 @@ const Tab = createMaterialBottomTabNavigator();
 
 const tabs = () => {
     return (
-        <Tab.Navigator>
+        <Tab.Navigator
+        screenOptions={({ route }) => ({
+       
+          tabBarActiveTintColor: 'tomato',
+          tabBarInactiveTintColor: 'gray',
+        })}
+        >
             <Tab.Screen
                 name="Home"
                 component={Home}

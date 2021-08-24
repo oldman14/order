@@ -11,3 +11,10 @@ export const deleteCart = (cart)=>{
         payload: cart
     }
 }
+
+export const deleteItemCart = (cart) =>{
+    return {
+        type: 'DELETE_ITEM_CART',
+        payload: cart
+    }
+}
