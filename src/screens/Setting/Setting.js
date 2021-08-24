@@ -57,6 +57,21 @@ const Setting = ({navigation}) => {
         </TouchableOpacity>
         </View>
         <View style={styles.setting}>
+            <TouchableOpacity onPress={()=> navigation.navigate('Menu')}>
+          <View style={styles.setting_box}>
+            <Image
+              style={styles.setting_image}
+              source={require('../../assets/images/icons8-menu-128.png')}
+            />
+            <Text style={styles.setting_title}>Thêm bàn</Text>
+            <Image
+              style={styles.setting_arrow}
+              source={require('../../assets/images/icons8-chevron-right-60.png')}
+            />
+          </View>
+        </TouchableOpacity>
+        </View>
+        <View style={styles.setting}>
           <View style={styles.setting_box}>
             <Image
               style={styles.setting_image}

@@ -1,6 +1,7 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import {View, Text, FlatList, StyleSheet, TouchableOpacity} from 'react-native';
 import {Dimensions} from 'react-native';
+import productApi from '../../api/productApi';
 
 const {width, height} = Dimensions.get('window');
 
@@ -14,10 +15,42 @@ const listTable = [
   {id: 7, tableName: 'L7'},
   {id: 8, tableName: 'L8'},
 ];
+const getMoviesFromApi = () => {
+  return fetch('http://192.168.171.2:3000')
+    .then((response) => response.json())
+    .then((json) => {
+      return json.movies;
+    })
+    .catch((error) => {
+      console.error(error);
+    });
+};
 
 const Home = ({navigation }) => {
   const widthItem = width / 3;
-
+  useEffect(() => {
+    const fetchListProduct = async() =>{
+      try {
+        const data = await productApi.getAll();
+        console.log(data)
+      } catch (error) {
+        console.log("Failed", error)
+      }
+    }
+    // const getMoviesFromApiAsync = async () => {
+    //   try {
+    //     const response = await fetch(
+    //       `${RN_APP_API_URL}/product`
+    //     );
+    //     const json = await response.json();
+    //     console.log(json)
+    //   } catch (error) {
+    //     console.error(error);
+    //   }
+    // };
+    
+    fetchListProduct();
+  }, [])
   const renderTable = ({item, index}) => {
     return (
       <TouchableOpacity

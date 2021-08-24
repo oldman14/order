@@ -9,19 +9,36 @@ import {
   Alert,
   ActivityIndicator,
   TouchableOpacity,
+  KeyboardAvoidingView,
+  ScrollView,
 } from 'react-native';
 import {SIZES} from '../../constants';
 import {utils} from '@react-native-firebase/app';
 import storage from '@react-native-firebase/storage';
 import {launchImageLibrary, launchCamera} from 'react-native-image-picker';
 import RBSheet from 'react-native-raw-bottom-sheet';
+import productApi from '../../api/productApi';
+
 const Menu = () => {
-  const [text, onChangeText] = useState();
+  const [text, setText] = useState(product={
+    ProductName: '',
+    price: '',
+    imageUrl: ''
+  });
   const [img, setImg] = useState(null);
   const [image, setImage] = useState(null);
   const [isLoading, setIsLoading] = useState();
   const [tranfers, setTranfers] = useState();
   const refRBSheet = useRef();
+  const fetchListProduct = async() =>{
+    try {
+      const data = await productApi.addProduct(text);
+      console.log(data)
+    } catch (error) {
+      console.log("Failed", error)
+    }
+  }
+  
   const openLibary = () => {
     refRBSheet.current.close();
     const option = {
@@ -56,6 +73,8 @@ const Menu = () => {
     const option = {
       includeBase64: true,
       mediaType: 'photo',
+      maxWidth: 300,
+      maxHeight: 400,
     };
     launchCamera(option, res => {
       console.log(res);
@@ -101,7 +120,10 @@ const Menu = () => {
     try {
       await task;
       setIsLoading(false);
-      Alert.alert('Image Uploaded', 'Image upload successful');
+      const url = await storage().ref(fileName).getDownloadURL();
+      await setText({...text, imageUrl: url})
+      fetchListProduct();
+      Alert.alert('Image Uploaded', url);
     } catch (error) {
       console.log('Upload Img', error);
     }
@@ -123,23 +145,31 @@ const Menu = () => {
         </View>
     )
   }
+  console.log(text)
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView
+    enabled
+    keyboardVerticalOffset={100}
+    behavior={Platform.OS === "ios" ? "padding" : "height"}
+    style={styles.container}
+    >    
+    <ScrollView>
       <View style={styles.section}>
         <View style={styles.section_box}>
           <Text style={styles.title}>Tên sản phẩm</Text>
           <TextInput
             style={styles.input}
-            onChangeText={onChangeText}
-            value={text}
+            onChangeText={item=>setText({...text,productName: item})}
+            value={text.productName}
+            name="productName"
           />
         </View>
         <View style={styles.section_box}>
           <Text style={styles.title}>Giá sản phẩm</Text>
           <TextInput
             style={styles.input}
-            onChangeText={onChangeText}
-            value={text}
+            onChangeText={item=>setText({...text,price:item})}
+            value={text.price}
           />
         </View>
         <View style={styles.section_box}>
@@ -166,11 +196,16 @@ const Menu = () => {
           <Text style={styles.title}>Ghi chú</Text>
           <TextInput
             style={styles.input}
-            onChangeText={onChangeText}
-            value={text}
+            onChangeText={item=>setText({product:{productName: item}})}
+            value={text.productName}
           />
         </View>
+
+        <TouchableOpacity onPress={()=>upPhoto()} style={styles.btnAddProduct}>
+          <Text style={styles.btnAddProductTitle}>THÊM MÓN</Text>
+        </TouchableOpacity>
       </View>
+     
       <RBSheet
         ref={refRBSheet}
         closeOnDragDown={true}
@@ -182,14 +217,17 @@ const Menu = () => {
         }}>
         {renderBottomSheet()}
       </RBSheet>
-    </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 };
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
     backgroundColor: '#eee',
   },
   section: {
+    flex: 1,
     backgroundColor: '#fff',
     marginVertical: 10,
   },
@@ -200,12 +238,14 @@ const styles = StyleSheet.create({
     fontSize: SIZES.body3,
   },
   input: {
-    height: 40,
+
+    height: 50,
     marginVertical: 8,
     borderWidth: 1,
     padding: 10,
     borderColor: '#ccc',
-    borderRadius: 10,
+    borderRadius: 8,
+    color: '#000'
   },
   imageBottomSheet:{
     justifyContent: 'center',
@@ -249,6 +289,19 @@ const styles = StyleSheet.create({
   },
   imagePick:{
     position: 'absolute'
+  },
+  btnAddProduct:{
+    height: 50,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#f90',
+    marginHorizontal: 8,
+    marginVertical:12,
+    borderRadius: 8
+  },
+  btnAddProductTitle: {
+    fontSize: SIZES.body3,
+    color: "#fff"
   }
 });
 export default Menu;
