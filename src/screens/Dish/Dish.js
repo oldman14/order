@@ -15,7 +15,12 @@ import {SIZES, COLORS, FONTS} from '../../constants';
 import RBSheet from 'react-native-raw-bottom-sheet';
 import BottomSheet from 'reanimated-bottom-sheet';
 import {useDispatch, useSelector} from 'react-redux';
-import {addCart, deleteCart, deleteItemCart} from '../../../redux/actions/cartItem';
+import {
+  addCart,
+  deleteCart,
+  deleteItemCart,
+} from '../../../redux/actions/cartItem';
+import productApi from '../../api/productApi';
 const DATA2 = [
   {
     id: 1,
@@ -75,18 +80,23 @@ const DATA2 = [
 
 const Dish = ({route, navigation}) => {
   const {id} = route.params;
-  console.log('log id', id);
+  const [dishList, setDishList] = useState(null);
   const [quantity, setQuantity] = useState(1);
-  const [dataOrder, setDataOrder] = useState();
   const [dishBottom, setDishBottom] = useState(null);
   const refRBSheet = useRef();
   const refRBSheet2 = useRef();
-  const bottomSheetModalRef = useRef(null);
   const dispatch = useDispatch();
   const state = useSelector(state => state.cart);
-  console.log('log state', state);
   const [modalVisible, setModalVisible] = useState(false);
   const dataCart = state.filter(item => item.id === id);
+  useEffect(() => {
+    const fetchListProduct = async () => {
+      const data = await productApi.getAll();
+      console.log('data dish', data);
+      setDishList(data);
+    };
+    fetchListProduct();
+  }, []);
   const addItem = () => {
     const cart = {
       id: id,
@@ -94,19 +104,19 @@ const Dish = ({route, navigation}) => {
     };
     dispatch(addCart(cart));
   };
-  const deleteCart1 =()=>{
+  const deleteCart1 = () => {
     const cart = {
-      id: id
-    }
-    dispatch(deleteCart(cart))
-  }
-  const deleteItem=(item)=>{  
+      id: id,
+    };
+    dispatch(deleteCart(cart));
+  };
+  const deleteItem = item => {
     const cart = {
-      id: id, 
-      product: item
-    }
-    dispatch(deleteItemCart(cart))
-  }
+      id: id,
+      product: item,
+    };
+    dispatch(deleteItemCart(cart));
+  };
   // variables
   useEffect(() => {
     if (dataCart[0] != undefined) {
@@ -214,27 +224,27 @@ const Dish = ({route, navigation}) => {
   };
   const renderBotSheetCart = () => {
     const renderItemCart = ({item}) => {
-      console.log("object", item)
+      console.log('object', item);
       return (
-        <TouchableOpacity onPress={()=> deleteItem(item)}>
-        <View
-          style={{
-            flexDirection: 'row',
-            paddingHorizontal: 15,
-            paddingVertical: 12,
-            borderBottomColor: '#eee',
-            borderBottomWidth: 0.5,
-          }}>
-          <View style={styles.cart_section1_cartItem}>
-            <Text style={{fontSize: SIZES.body2, fontWeight: 'bold'}}>
-              {item.quantity + 'x' + ' ' + item.product.productName}
-            </Text>
-            <Text>Vừa</Text>
+        <TouchableOpacity onPress={() => deleteItem(item)}>
+          <View
+            style={{
+              flexDirection: 'row',
+              paddingHorizontal: 15,
+              paddingVertical: 12,
+              borderBottomColor: '#eee',
+              borderBottomWidth: 0.5,
+            }}>
+            <View style={styles.cart_section1_cartItem}>
+              <Text style={{fontSize: SIZES.body2, fontWeight: 'bold'}}>
+                {item.quantity + 'x' + ' ' + item.product.productName}
+              </Text>
+              <Text>Vừa</Text>
+            </View>
+            <View style={{justifyContent: 'space-between'}}>
+              <Text style={{fontSize: SIZES.body2}}>88.000đ</Text>
+            </View>
           </View>
-          <View style={{justifyContent: 'space-between'}}>
-            <Text style={{fontSize: SIZES.body2}}>88.000đ</Text>
-          </View>
-        </View>
         </TouchableOpacity>
       );
     };
@@ -268,16 +278,28 @@ const Dish = ({route, navigation}) => {
           <Text style={styles.cart_totalMoney_title}>Tổng cộng</Text>
           <View style={{flexDirection: 'row'}}>
             <Text style={{flex: 7, fontSize: SIZES.body2}}>Thành tiền</Text>
-            <Text style={{flex: 3, fontSize: SIZES.body2, textAlign:'right'}}>182.000đ</Text>
+            <Text style={{flex: 3, fontSize: SIZES.body2, textAlign: 'right'}}>
+              182.000đ
+            </Text>
           </View>
         </View>
-        <TouchableOpacity onPress={()=>deleteCart1()}>
-        <View style={styles.cart_delete}>
-          <Image style={{width: 30, height: 30}} source={require('../../assets/images/icons8_delete.png')}/>
-          <Text style={{paddingHorizontal: 10, fontSize: SIZES.body3, alignSelf: 'center'}}>Xóa đơn hàng</Text>
-        </View>
+        <TouchableOpacity onPress={() => deleteCart1()}>
+          <View style={styles.cart_delete}>
+            <Image
+              style={{width: 30, height: 30}}
+              source={require('../../assets/images/icons8_delete.png')}
+            />
+            <Text
+              style={{
+                paddingHorizontal: 10,
+                fontSize: SIZES.body3,
+                alignSelf: 'center',
+              }}>
+              Xóa đơn hàng
+            </Text>
+          </View>
         </TouchableOpacity>
-    
+
         <View style={styles.cart_acceptContainer}>
           <View
             style={{justifyContent: 'center', flex: 8, paddingHorizontal: 10}}>
@@ -297,7 +319,6 @@ const Dish = ({route, navigation}) => {
     refRBSheet.current.open();
   };
   const renderItems = ({item}) => {
-
     return (
       <TouchableOpacity onPress={() => openBottomSheet(item)}>
         <View style={{flex: 1}}>
@@ -319,8 +340,8 @@ const Dish = ({route, navigation}) => {
   return (
     <View style={styles.container}>
       <FlatList
-        data={DATA2}
-        keyExtractor={item => item.id}
+        data={dishList}
+        keyExtractor={item => item._id}
         renderItem={renderItems}
         numColumns={3}
         contentContainerStyle={styles.containerFlat}
@@ -502,16 +523,16 @@ const styles = StyleSheet.create({
     borderBottomColor: '#eee',
     paddingVertical: 15,
     justifyContent: 'center',
-    backgroundColor: '#fff'
+    backgroundColor: '#fff',
   },
   cart_title: {
     fontSize: SIZES.h3,
-    fontWeight: 'bold'
+    fontWeight: 'bold',
   },
   cart_section1: {
     width: SIZES.width,
-    backgroundColor:'#fff',
-    marginTop: 10
+    backgroundColor: '#fff',
+    marginTop: 10,
   },
   cart_titleSection: {
     flexDirection: 'row',
@@ -564,22 +585,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 5,
     marginTop: 10,
-    paddingBottom: 10
-
+    paddingBottom: 10,
   },
-  cart_totalMoney_title:{
+  cart_totalMoney_title: {
     fontSize: SIZES.body2,
     fontWeight: 'bold',
     paddingVertical: 8,
   },
-  cart_delete:{
+  cart_delete: {
     flexDirection: 'row',
     backgroundColor: '#fff',
     paddingHorizontal: 10,
-    paddingVertical:10,
-    marginTop: 10
-  }
-  
+    paddingVertical: 10,
+    marginTop: 10,
+  },
 });
 
 export default Dish;

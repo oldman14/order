@@ -42,34 +42,34 @@ const Setting = ({navigation}) => {
           </View>
         </View>
         <View style={styles.setting}>
-            <TouchableOpacity onPress={()=> navigation.navigate('Menu')}>
-          <View style={styles.setting_box}>
-            <Image
-              style={styles.setting_image}
-              source={require('../../assets/images/icons8-menu-128.png')}
-            />
-            <Text style={styles.setting_title}>Chỉnh sửa thực đơn</Text>
-            <Image
-              style={styles.setting_arrow}
-              source={require('../../assets/images/icons8-chevron-right-60.png')}
-            />
-          </View>
-        </TouchableOpacity>
+          <TouchableOpacity onPress={() => navigation.navigate('Menu')}>
+            <View style={styles.setting_box}>
+              <Image
+                style={styles.setting_image}
+                source={require('../../assets/images/icons8-menu-128.png')}
+              />
+              <Text style={styles.setting_title}>Chỉnh sửa thực đơn</Text>
+              <Image
+                style={styles.setting_arrow}
+                source={require('../../assets/images/icons8-chevron-right-60.png')}
+              />
+            </View>
+          </TouchableOpacity>
         </View>
         <View style={styles.setting}>
-            <TouchableOpacity onPress={()=> navigation.navigate('Menu')}>
-          <View style={styles.setting_box}>
-            <Image
-              style={styles.setting_image}
-              source={require('../../assets/images/icons8-menu-128.png')}
-            />
-            <Text style={styles.setting_title}>Thêm bàn</Text>
-            <Image
-              style={styles.setting_arrow}
-              source={require('../../assets/images/icons8-chevron-right-60.png')}
-            />
-          </View>
-        </TouchableOpacity>
+          <TouchableOpacity onPress={() => navigation.navigate('Table')}>
+            <View style={styles.setting_box}>
+              <Image
+                style={styles.setting_image}
+                source={require('../../assets/images/icons8-menu-128.png')}
+              />
+              <Text style={styles.setting_title}>Chỉnh sửa bàn</Text>
+              <Image
+                style={styles.setting_arrow}
+                source={require('../../assets/images/icons8-chevron-right-60.png')}
+              />
+            </View>
+          </TouchableOpacity>
         </View>
         <View style={styles.setting}>
           <View style={styles.setting_box}>
@@ -97,7 +97,6 @@ const Setting = ({navigation}) => {
             />
           </View>
         </View>
-      
       </View>
     </View>
   );
@@ -140,7 +139,7 @@ const styles = StyleSheet.create({
   setting: {
     backgroundColor: '#fff',
     borderRadius: 8,
-    marginVertical:8
+    marginVertical: 8,
   },
   setting_box: {
     flexDirection: 'row',
@@ -158,11 +157,11 @@ const styles = StyleSheet.create({
     width: 20,
     height: 20,
     alignSelf: 'center',
-    alignContent:'flex-end'
+    alignContent: 'flex-end',
   },
   setting_title: {
-      marginLeft: 5,
-    width: SIZES.width-110,
+    marginLeft: 5,
+    width: SIZES.width - 110,
     fontSize: SIZES.body2,
     alignSelf: 'center',
   },

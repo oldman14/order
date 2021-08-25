@@ -1,12 +1,11 @@
-import React from 'react'
-import { View, Text } from 'react-native'
-
+import React from 'react';
+import {View, Text} from 'react-native';
 const Ordered = () => {
-    return (
-        <View>
-            <Text>ordered</Text>
-        </View>
-    )
-}
+  return (
+    <View>
+      <Text>ordered</Text>
+    </View>
+  );
+};
 
-export default Ordered
+export default Ordered;
