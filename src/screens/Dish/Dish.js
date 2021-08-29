@@ -21,63 +21,8 @@ import {
   deleteItemCart,
 } from '../../../redux/actions/cartItem';
 import productApi from '../../api/productApi';
-const DATA2 = [
-  {
-    id: 1,
-    productName: 'Cơm tấm',
-    image:
-      'https://cdn.daynauan.info.vn/wp-content/uploads/2019/05/com-tam-la-mon-an-binh-dan.jpg',
-  },
-  {
-    id: 2,
-    productName: 'Cơm cá kho',
-    image:
-      'https://cdn.daynauan.info.vn/wp-content/uploads/2019/05/com-tam-la-mon-an-binh-dan.jpg',
-  },
-  {
-    id: 3,
-    productName: 'Cơm cá chiên',
-    image:
-      'http://f.imgs.vietnamnet.vn/2017/12/12/15/khoi-mat-cong-ra-quan-vi-cong-thuc-com-tam-chuan-vi-nhat-ngay-day.jpg',
-  },
-  {
-    id: 4,
-    productName: 'Cơm tấm',
-    image:
-      'https://cdn.daynauan.info.vn/wp-content/uploads/2019/05/com-tam-la-mon-an-binh-dan.jpg',
-  },
-  {
-    id: 5,
-    productName: 'Cơm cá kho',
-    image:
-      'https://cdn.daynauan.info.vn/wp-content/uploads/2019/05/com-tam-la-mon-an-binh-dan.jpg',
-  },
-  {
-    id: 6,
-    productName: 'Cơm cá chiên',
-    image:
-      'http://f.imgs.vietnamnet.vn/2017/12/12/15/khoi-mat-cong-ra-quan-vi-cong-thuc-com-tam-chuan-vi-nhat-ngay-day.jpg',
-  },
-  {
-    id: 7,
-    productName: 'Cơm tấm',
-    image:
-      'https://cdn.daynauan.info.vn/wp-content/uploads/2019/05/com-tam-la-mon-an-binh-dan.jpg',
-  },
-  {
-    id: 8,
-    productName: 'Cơm cá kho',
-    image:
-      'https://cdn.daynauan.info.vn/wp-content/uploads/2019/05/com-tam-la-mon-an-binh-dan.jpg',
-  },
-  {
-    id: 9,
-    productName: 'Cơm cá chiên',
-    image:
-      'http://f.imgs.vietnamnet.vn/2017/12/12/15/khoi-mat-cong-ra-quan-vi-cong-thuc-com-tam-chuan-vi-nhat-ngay-day.jpg',
-  },
-];
-
+import orderApi from '../../api/orderApi';
+import {data} from 'browserslist';
 const Dish = ({route, navigation}) => {
   const {id} = route.params;
   const [dishList, setDishList] = useState(null);
@@ -88,7 +33,7 @@ const Dish = ({route, navigation}) => {
   const dispatch = useDispatch();
   const state = useSelector(state => state.cart);
   const [modalVisible, setModalVisible] = useState(false);
-  const dataCart = state.filter(item => item.id === id);
+  const dataCart = state.filter(item => item._id === id);
   useEffect(() => {
     const fetchListProduct = async () => {
       const data = await productApi.getAll();
@@ -98,21 +43,22 @@ const Dish = ({route, navigation}) => {
     fetchListProduct();
   }, []);
   const addItem = () => {
+    refRBSheet.current.close();
     const cart = {
-      id: id,
+      _id: id,
       listProduct: [{product: dishBottom, quantity: quantity}],
     };
     dispatch(addCart(cart));
   };
   const deleteCart1 = () => {
     const cart = {
-      id: id,
+      _id: id,
     };
     dispatch(deleteCart(cart));
   };
   const deleteItem = item => {
     const cart = {
-      id: id,
+      _id: id,
       product: item,
     };
     dispatch(deleteItemCart(cart));
@@ -127,8 +73,32 @@ const Dish = ({route, navigation}) => {
     }
   }, [dataCart]);
   // callbacks
-  imageDef =
-    'http://f.imgs.vietnamnet.vn/2017/12/12/15/khoi-mat-cong-ra-quan-vi-cong-thuc-com-tam-chuan-vi-nhat-ngay-day.jpg';
+  const addOrder = async (date, total) => {
+    let currentdate = new Date();
+    let oneJan = new Date(currentdate.getFullYear(), 0, 1);
+    let numberOfDays = Math.floor(
+      (currentdate - oneJan) / (24 * 60 * 60 * 1000),
+    );
+    let result = Math.ceil((currentdate.getDay() + 1 + numberOfDays) / 7);
+    console.log(
+      `The week number of the current date (${currentdate}) is ${result}.`,
+    );
+    const obOrder = {
+      total: total,
+      listProduct: dataCart[0].listProduct,
+      date: date,
+      week: result,
+    };
+    try {
+      const dataOrder = await orderApi.addOrder(obOrder);
+      console.log(dataOrder);
+      deleteCart1();
+      navigation.navigate('Home');
+    } catch (error) {
+      console.log('Add failed', error);
+    }
+  };
+
   const renderBottomButton = () => {
     return (
       <View style={{flexDirection: 'row'}}>
@@ -223,6 +193,15 @@ const Dish = ({route, navigation}) => {
     );
   };
   const renderBotSheetCart = () => {
+    let total;
+    if (dataCart[0] != undefined) {
+      console.log(dataCart);
+      total = dataCart[0].listProduct.reduce((pre, cur) => {
+        return pre + cur.product.price;
+      }, 0);
+    }
+    const date = new Date();
+    console.log('log date', date);
     const renderItemCart = ({item}) => {
       console.log('object', item);
       return (
@@ -242,7 +221,7 @@ const Dish = ({route, navigation}) => {
               <Text>Vừa</Text>
             </View>
             <View style={{justifyContent: 'space-between'}}>
-              <Text style={{fontSize: SIZES.body2}}>88.000đ</Text>
+              <Text style={{fontSize: SIZES.body2}}>{item.product.price}</Text>
             </View>
           </View>
         </TouchableOpacity>
@@ -267,7 +246,7 @@ const Dish = ({route, navigation}) => {
           {dataCart[0] != undefined ? (
             <FlatList
               data={dataCart[0].listProduct}
-              keyExtractor={item => item.product.id}
+              keyExtractor={item => item.product._id}
               renderItem={renderItemCart}
             />
           ) : (
@@ -279,7 +258,7 @@ const Dish = ({route, navigation}) => {
           <View style={{flexDirection: 'row'}}>
             <Text style={{flex: 7, fontSize: SIZES.body2}}>Thành tiền</Text>
             <Text style={{flex: 3, fontSize: SIZES.body2, textAlign: 'right'}}>
-              182.000đ
+              {total}
             </Text>
           </View>
         </View>
@@ -304,9 +283,11 @@ const Dish = ({route, navigation}) => {
           <View
             style={{justifyContent: 'center', flex: 8, paddingHorizontal: 10}}>
             <Text style={styles.orderTitle}>Giỏ hàng hiện tại</Text>
-            <Text style={styles.orderText}>172.000d</Text>
+            <Text style={styles.orderText}>{total}</Text>
           </View>
-          <TouchableOpacity style={{height: 40, alignSelf: 'center'}}>
+          <TouchableOpacity
+            onPress={() => addOrder(date, total)}
+            style={{height: 40, alignSelf: 'center'}}>
             <Text style={styles.cart_btnPay}>Thanh Toán</Text>
           </TouchableOpacity>
         </View>
@@ -318,7 +299,7 @@ const Dish = ({route, navigation}) => {
     setDishBottom(item);
     refRBSheet.current.open();
   };
-  const renderItems = ({item}) => {
+  const renderDish = ({item}) => {
     return (
       <TouchableOpacity onPress={() => openBottomSheet(item)}>
         <View style={{flex: 1}}>
@@ -327,8 +308,12 @@ const Dish = ({route, navigation}) => {
               <Image style={styles.image} source={{uri: item.image}} />
             </View>
             <View>
-              <Text style={styles.nameDish}>{item.productName}</Text>
-              <Text style={styles.price}>58.000đ</Text>
+              <Text numberOfLines={1} style={styles.nameDish}>
+                {item.productName}
+              </Text>
+              <Text numberOfLines={1} style={styles.price}>
+                {item.price}
+              </Text>
               <View></View>
             </View>
           </View>
@@ -342,7 +327,7 @@ const Dish = ({route, navigation}) => {
       <FlatList
         data={dishList}
         keyExtractor={item => item._id}
-        renderItem={renderItems}
+        renderItem={renderDish}
         numColumns={3}
         contentContainerStyle={styles.containerFlat}
       />
@@ -440,7 +425,8 @@ const styles = StyleSheet.create({
   nameDish: {
     color: 'black',
     alignSelf: 'center',
-    fontSize: SIZES.h3,
+    fontSize: SIZES.h5,
+    fontWeight: 'bold',
   },
   price: {
     alignSelf: 'center',
@@ -484,7 +470,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 10,
     backgroundColor: '#f90',
     position: 'absolute',
-    bottom: 20,
+    bottom: 100,
     right: 0,
     left: 0,
     borderRadius: 3,

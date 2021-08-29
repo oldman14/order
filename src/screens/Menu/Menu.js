@@ -33,10 +33,9 @@ const Menu = () => {
   const [tranfers, setTranfers] = useState();
   const refRBSheet = useRef();
   const fetchListProduct = async item => {
-    setText({...text, imageUrl: item});
-    console.log('log tesst', text);
+    console.log('log tesst', item);
     try {
-      const data = await productApi.addProduct(text);
+      const data = await productApi.addProduct(item);
       console.log('log respone', data);
     } catch (error) {
       console.log('Failed', error);
@@ -132,8 +131,10 @@ const Menu = () => {
       await task;
       setIsLoading(false);
       let url = await storage().ref(fileName).getDownloadURL();
-      url && setText({...text, imageUrl: url});
-      fetchListProduct(url);
+      setText({...text, imageUrl: url});
+      const dataMenu = {...text, imageUrl: url};
+      console.log('logdata menu', dataMenu);
+      fetchListProduct(dataMenu);
       setText({...text, productName: '', price: '', imageUrl: '', note: ''});
       setImage(null);
       createThreeButtonAlert();

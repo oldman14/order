@@ -1,8 +1,52 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {View, Text, StyleSheet, Image, TouchableOpacity} from 'react-native';
 import {SIZES} from '../../constants';
-
+import statisticalApi from '../../api/statisticalApi';
 const Setting = ({navigation}) => {
+  const [totalDay, setTotalDay] = useState(0);
+  const [totalWeek, setTotalWeek] = useState(0);
+  const handleWeek = () => {
+    var currentdate = new Date();
+    var oneJan = new Date(currentdate.getFullYear(), 0, 1);
+    var numberOfDays = Math.floor(
+      (currentdate - oneJan) / (24 * 60 * 60 * 1000),
+    );
+    var result = Math.ceil((currentdate.getDay() + 1 + numberOfDays) / 7);
+    return result;
+  };
+  useEffect(() => {
+    const getStatis = async () => {
+      try {
+        const date = new Date();
+        // .toISOString()
+        // .replace('-', '/')
+        // .split('T')[0]
+        // .replace('-', '/');
+        console.log(date);
+        const data = await statisticalApi.getAll({onDate: date});
+        setTotalDay(data);
+      } catch (error) {
+        console.log('Get date faile', error);
+      }
+    };
+    getStatis();
+    const getWeek = async () => {
+      try {
+        const date = new Date();
+        const year = date.getFullYear();
+        const week = handleWeek();
+        const data = await statisticalApi.getWeek({
+          onDate: date,
+          week: week,
+          year: year,
+        });
+        setTotalWeek(data);
+      } catch (error) {
+        console.log('Get date faile', error);
+      }
+    };
+    getWeek();
+  }, []);
   return (
     <View style={styles.container}>
       <View style={styles.section}>
@@ -14,15 +58,15 @@ const Setting = ({navigation}) => {
               source={require('../../assets/images/icons8-present-40.png')}
             />
             <Text style={styles.box_title}>Hôm nay</Text>
-            <Text style={styles.box_total}>200.000đ</Text>
+            <Text style={styles.box_total}>{totalDay}đ</Text>
           </View>
           <View style={styles.boxDT}>
             <Image
               style={styles.box_image}
               source={require('../../assets/images/icons8-last-24-hours-90.png')}
             />
-            <Text style={styles.box_title}>Hôm qua</Text>
-            <Text style={styles.box_total}>19.000.000đ</Text>
+            <Text style={styles.box_title}>Tuần này</Text>
+            <Text style={styles.box_total}>{totalWeek}đ</Text>
           </View>
         </View>
       </View>
