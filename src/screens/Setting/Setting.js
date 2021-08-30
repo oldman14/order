@@ -2,6 +2,7 @@ import React, {useEffect, useState} from 'react';
 import {View, Text, StyleSheet, Image, TouchableOpacity} from 'react-native';
 import {SIZES} from '../../constants';
 import statisticalApi from '../../api/statisticalApi';
+import formatCurrency from '../component/formatCurrency';
 const Setting = ({navigation}) => {
   const [totalDay, setTotalDay] = useState(0);
   const [totalWeek, setTotalWeek] = useState(0);
@@ -17,13 +18,13 @@ const Setting = ({navigation}) => {
   useEffect(() => {
     const getStatis = async () => {
       try {
-        const date = new Date();
-        // .toISOString()
-        // .replace('-', '/')
-        // .split('T')[0]
-        // .replace('-', '/');
-        console.log(date);
+        const date = new Date()
+          .toISOString()
+          .replace('-', '/')
+          .split('T')[0]
+          .replace('-', '/');
         const data = await statisticalApi.getAll({onDate: date});
+        console.log(data);
         setTotalDay(data);
       } catch (error) {
         console.log('Get date faile', error);
@@ -35,11 +36,13 @@ const Setting = ({navigation}) => {
         const date = new Date();
         const year = date.getFullYear();
         const week = handleWeek();
-        const data = await statisticalApi.getWeek({
-          onDate: date,
-          week: week,
-          year: year,
-        });
+        const data = await statisticalApi.getWeek(
+          (onDate = {
+            onDate: date,
+            week: week,
+            year: year,
+          }),
+        );
         setTotalWeek(data);
       } catch (error) {
         console.log('Get date faile', error);
@@ -58,7 +61,7 @@ const Setting = ({navigation}) => {
               source={require('../../assets/images/icons8-present-40.png')}
             />
             <Text style={styles.box_title}>Hôm nay</Text>
-            <Text style={styles.box_total}>{totalDay}đ</Text>
+            <Text style={styles.box_total}>{formatCurrency(totalDay)}</Text>
           </View>
           <View style={styles.boxDT}>
             <Image
@@ -66,7 +69,7 @@ const Setting = ({navigation}) => {
               source={require('../../assets/images/icons8-last-24-hours-90.png')}
             />
             <Text style={styles.box_title}>Tuần này</Text>
-            <Text style={styles.box_total}>{totalWeek}đ</Text>
+            <Text style={styles.box_total}>{formatCurrency(totalWeek)}</Text>
           </View>
         </View>
       </View>

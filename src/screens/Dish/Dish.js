@@ -10,6 +10,7 @@ import {
   TouchableOpacity,
   Button,
   Modal,
+  Pressable,
 } from 'react-native';
 import {SIZES, COLORS, FONTS} from '../../constants';
 import RBSheet from 'react-native-raw-bottom-sheet';
@@ -23,8 +24,10 @@ import {
 import productApi from '../../api/productApi';
 import orderApi from '../../api/orderApi';
 import {data} from 'browserslist';
+import formatCurrency from '../component/formatCurrency';
 const Dish = ({route, navigation}) => {
-  const {id} = route.params;
+  const {id, tableName} = route.params;
+  console.log('tableName', tableName);
   const [dishList, setDishList] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const [dishBottom, setDishBottom] = useState(null);
@@ -34,19 +37,43 @@ const Dish = ({route, navigation}) => {
   const state = useSelector(state => state.cart);
   const [modalVisible, setModalVisible] = useState(false);
   const dataCart = state.filter(item => item._id === id);
+  const [totalPrice, settotalPrice] = useState(0);
+  const [isOrder, setIsOrder] = useState(false);
+
+  const confirm = () => {
+    setIsOrder(!isOrder);
+    // addOrder(date, total);
+  };
   useEffect(() => {
     const fetchListProduct = async () => {
       const data = await productApi.getAll();
-      console.log('data dish', data);
       setDishList(data);
     };
     fetchListProduct();
   }, []);
+  useEffect(() => {
+    let total;
+    if (dataCart[0] != undefined) {
+      console.log(dataCart);
+      total = dataCart[0].listProduct.reduce((pre, cur) => {
+        return pre + cur.product.price * cur.quantity;
+      }, 0);
+      settotalPrice(total);
+    }
+  }, [dataCart]);
   const addItem = () => {
+    setQuantity(1);
+    const time = new Date();
+    const minutes = time.getMinutes();
+    const hours = time.getHours();
+    const currentTime = hours + ':' + minutes;
     refRBSheet.current.close();
     const cart = {
       _id: id,
       listProduct: [{product: dishBottom, quantity: quantity}],
+      tableName: tableName,
+      time: currentTime,
+      total: totalPrice,
     };
     dispatch(addCart(cart));
   };
@@ -73,20 +100,17 @@ const Dish = ({route, navigation}) => {
     }
   }, [dataCart]);
   // callbacks
-  const addOrder = async (date, total) => {
+  const addOrder = async () => {
     let currentdate = new Date();
     let oneJan = new Date(currentdate.getFullYear(), 0, 1);
     let numberOfDays = Math.floor(
       (currentdate - oneJan) / (24 * 60 * 60 * 1000),
     );
     let result = Math.ceil((currentdate.getDay() + 1 + numberOfDays) / 7);
-    console.log(
-      `The week number of the current date (${currentdate}) is ${result}.`,
-    );
     const obOrder = {
-      total: total,
+      total: totalPrice,
       listProduct: dataCart[0].listProduct,
-      date: date,
+      date: currentdate,
       week: result,
     };
     try {
@@ -166,7 +190,9 @@ const Dish = ({route, navigation}) => {
             <Text style={styles.nameDishBotSheet}>
               {dishBottom != null ? dishBottom.productName : 'Demo'}
             </Text>
-            <Text style={styles.priceBotSheet}>58.000đ</Text>
+            <Text style={styles.priceBotSheet}>
+              {dishBottom != null ? `${formatCurrency(dishBottom.price)}` : 0}đ
+            </Text>
             <View></View>
           </View>
         </View>
@@ -193,15 +219,7 @@ const Dish = ({route, navigation}) => {
     );
   };
   const renderBotSheetCart = () => {
-    let total;
-    if (dataCart[0] != undefined) {
-      console.log(dataCart);
-      total = dataCart[0].listProduct.reduce((pre, cur) => {
-        return pre + cur.product.price;
-      }, 0);
-    }
-    const date = new Date();
-    console.log('log date', date);
+    // settotalPrice(total);
     const renderItemCart = ({item}) => {
       console.log('object', item);
       return (
@@ -221,7 +239,9 @@ const Dish = ({route, navigation}) => {
               <Text>Vừa</Text>
             </View>
             <View style={{justifyContent: 'space-between'}}>
-              <Text style={{fontSize: SIZES.body2}}>{item.product.price}</Text>
+              <Text style={{fontSize: SIZES.body2}}>
+                {formatCurrency(item.product.price)}
+              </Text>
             </View>
           </View>
         </TouchableOpacity>
@@ -239,7 +259,7 @@ const Dish = ({route, navigation}) => {
         <View style={styles.cart_section1}>
           <View style={styles.cart_titleSection}>
             <Text style={styles.cart_titleListOrder}>Các sản phẩm đã chọn</Text>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={() => refRBSheet.current.close()}>
               <Text style={styles.cart_addTitle}>Thêm</Text>
             </TouchableOpacity>
           </View>
@@ -258,7 +278,7 @@ const Dish = ({route, navigation}) => {
           <View style={{flexDirection: 'row'}}>
             <Text style={{flex: 7, fontSize: SIZES.body2}}>Thành tiền</Text>
             <Text style={{flex: 3, fontSize: SIZES.body2, textAlign: 'right'}}>
-              {total}
+              {formatCurrency(totalPrice)}
             </Text>
           </View>
         </View>
@@ -282,11 +302,11 @@ const Dish = ({route, navigation}) => {
         <View style={styles.cart_acceptContainer}>
           <View
             style={{justifyContent: 'center', flex: 8, paddingHorizontal: 10}}>
-            <Text style={styles.orderTitle}>Giỏ hàng hiện tại</Text>
-            <Text style={styles.orderText}>{total}</Text>
+            <Text style={styles.orderTitle}>Đơn hàng hiện tại</Text>
+            <Text style={styles.orderText}>{formatCurrency(totalPrice)}</Text>
           </View>
           <TouchableOpacity
-            onPress={() => addOrder(date, total)}
+            onPress={() => confirm()}
             style={{height: 40, alignSelf: 'center'}}>
             <Text style={styles.cart_btnPay}>Thanh Toán</Text>
           </TouchableOpacity>
@@ -312,7 +332,7 @@ const Dish = ({route, navigation}) => {
                 {item.productName}
               </Text>
               <Text numberOfLines={1} style={styles.price}>
-                {item.price}
+                {formatCurrency(item.price)}
               </Text>
               <View></View>
             </View>
@@ -366,11 +386,32 @@ const Dish = ({route, navigation}) => {
             />
           </View>
           <View style={{justifyContent: 'center'}}>
-            <Text style={styles.orderTitle}>Giỏ hàng hiện tại</Text>
-            <Text style={styles.orderText}>172.000d</Text>
+            <Text style={styles.orderTitle}>Đơn hàng hiện tại</Text>
+            <Text style={styles.orderText}>{formatCurrency(totalPrice)}</Text>
           </View>
         </View>
       </TouchableOpacity>
+      <Modal animationType="slide" transparent={true} visible={isOrder}>
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
+            <Text style={styles.titleModal}>
+              Bạn không thể thay đổi đơn hàng khi đã xác nhận
+            </Text>
+            <View style={styles.btnView}>
+              <Pressable
+                style={[styles.button, styles.buttonClose]}
+                onPress={() => setIsOrder(!isOrder)}>
+                <Text style={styles.textStyle}>Hủy</Text>
+              </Pressable>
+              <Pressable
+                style={[styles.button, styles.buttonAccept]}
+                onPress={() => addOrder()}>
+                <Text style={styles.textStyle}>Xác nhận</Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -442,6 +483,14 @@ const styles = StyleSheet.create({
     borderWidth: 0.5,
     borderColor: '#ccc',
     borderRadius: 5,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
   },
   containerFlat: {
     marginHorizontal: (SIZES.width * 0.1) / 8,
@@ -560,7 +609,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 10,
     paddingHorizontal: 5,
     paddingVertical: 5,
-    borderRadius: 10,
+    borderRadius: 8,
     backgroundColor: '#fff',
     color: '#f90',
     fontWeight: 'bold',
@@ -584,6 +633,69 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 10,
     marginTop: 10,
+  },
+  centeredView: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 22,
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: 'white',
+    borderRadius: 20,
+    paddingHorizontal: 35,
+    paddingTop: 35,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  button: {
+    width: 100,
+    height: 40,
+    borderRadius: 20,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    marginHorizontal: 5,
+    marginVertical: 10,
+    elevation: 2,
+  },
+  buttonAccept: {
+    backgroundColor: '#f90',
+  },
+  buttonClose: {
+    backgroundColor: '#2196F3',
+  },
+  textStyle: {
+    color: 'white',
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  modalText: {
+    marginBottom: 15,
+    textAlign: 'center',
+  },
+  modalTextInput: {
+    borderColor: '#ddd',
+    height: 50,
+    borderWidth: 0.5,
+    width: SIZES.width / 2,
+    color: '#000',
+  },
+  btnView: {
+    flexDirection: 'row',
+    marginVertical: 10,
+  },
+  titleModal: {
+    fontSize: SIZES.body2,
+    alignItems: 'center',
+    textAlign: 'center',
   },
 });
 

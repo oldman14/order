@@ -26,17 +26,14 @@ const Menu = () => {
       note: '',
     }),
   );
-  console.log('text cua Duong', {text});
   const [img, setImg] = useState(null);
   const [image, setImage] = useState(null);
   const [isLoading, setIsLoading] = useState();
   const [tranfers, setTranfers] = useState();
   const refRBSheet = useRef();
   const fetchListProduct = async item => {
-    console.log('log tesst', item);
     try {
       const data = await productApi.addProduct(item);
-      console.log('log respone', data);
     } catch (error) {
       console.log('Failed', error);
     }
@@ -49,7 +46,6 @@ const Menu = () => {
       mediaType: 'photo',
     };
     launchImageLibrary(option, res => {
-      console.log(res);
       if (res.didCancel) {
         console.log('Didcancle');
       }
@@ -59,7 +55,6 @@ const Menu = () => {
       if (res.errorMessage) {
         console.log('error Message');
       } else {
-        console.log(res.assets);
         if (res.assets != undefined) {
           setImg(res.assets[0].uri);
           const imageSource = {
@@ -79,7 +74,6 @@ const Menu = () => {
       maxHeight: 400,
     };
     launchCamera(option, res => {
-      console.log(res);
       if (res.didCancel) {
         console.log('Didcancle');
       }
@@ -89,7 +83,6 @@ const Menu = () => {
       if (res.errorMessage) {
         console.log('error Message');
       } else {
-        console.log(res.assets);
         if (res.assets != undefined) {
           setImg(res.assets[0].uri);
           const imageSource = {
@@ -100,48 +93,63 @@ const Menu = () => {
       }
     });
   };
-  const createThreeButtonAlert = () =>
-    Alert.alert('Alert Title', 'My Alert Msg', [
-      {
-        text: 'Cancel',
-        onPress: () => console.log('Cancel Pressed'),
-        style: 'cancel',
-      },
-      {text: 'OK', onPress: () => console.log('OK Pressed')},
-    ]);
-
   const upPhoto = async () => {
-    setIsLoading(true);
-    setTranfers(0);
     const upPhotoUri = img;
-    //get filename
-    let fileName = upPhotoUri.substring(upPhotoUri.lastIndexOf('/') + 1); //
-    const task = storage().ref(fileName).putFile(upPhotoUri);
-    task.on('state_changed', taskSnapshot => {
-      console.log(
-        `${taskSnapshot.bytesTransferred} transferred out of ${taskSnapshot.totalBytes}`,
-      );
-      //số byte đã chuyển đi chia tổng byte để lấy %
-      setTranfers(
-        Math.round(taskSnapshot.bytesTransferred / taskSnapshot.totalBytes) *
-          100,
-      );
-    });
-    try {
-      await task;
-      setIsLoading(false);
-      let url = await storage().ref(fileName).getDownloadURL();
-      setText({...text, imageUrl: url});
-      const dataMenu = {...text, imageUrl: url};
-      console.log('logdata menu', dataMenu);
-      fetchListProduct(dataMenu);
-      setText({...text, productName: '', price: '', imageUrl: '', note: ''});
-      setImage(null);
-      createThreeButtonAlert();
-    } catch (error) {
-      console.log('Upload Img', error);
+    if (upPhotoUri != null) {
+      if (/\D/.test(text.price)) {
+        createTwoButtonAlert('Cảnh báo', 'Giá bắt buộc là số');
+      } else {
+        setIsLoading(true);
+        setTranfers(0);
+        let fileName = upPhotoUri.substring(upPhotoUri.lastIndexOf('/') + 1); //
+        const task = storage().ref(fileName).putFile(upPhotoUri);
+        task.on('state_changed', taskSnapshot => {
+          console.log(
+            `${taskSnapshot.bytesTransferred} transferred out of ${taskSnapshot.totalBytes}`,
+          );
+          //số byte đã chuyển đi chia tổng byte để lấy %
+          setTranfers(
+            Math.round(
+              taskSnapshot.bytesTransferred / taskSnapshot.totalBytes,
+            ) * 100,
+          );
+        });
+        try {
+          await task;
+          setIsLoading(false);
+          let url = await storage().ref(fileName).getDownloadURL();
+          setText({...text, imageUrl: url});
+          const dataMenu = {...text, imageUrl: url};
+          if (
+            dataMenu.imageUrl.length > 1 &&
+            dataMenu.price.length > 1 &&
+            dataMenu.productName.length > 1
+          ) {
+            fetchListProduct(dataMenu);
+            setText({
+              ...text,
+              productName: '',
+              price: '',
+              imageUrl: '',
+              note: '',
+            });
+            setImage(null);
+            createTwoButtonAlert('Thông báo', 'Thêm thành công');
+          } else {
+            createTwoButtonAlert('Cảnh báo', 'Có mục đang bị bỏ trống');
+          }
+        } catch (error) {
+          console.log('Upload Img', error);
+        }
+      }
+    } else {
+      createTwoButtonAlert('Cảnh báo', 'Chưa thêm ảnh');
     }
   };
+  const createTwoButtonAlert = (title, myAlert) =>
+    Alert.alert(title, myAlert, [
+      {text: 'OK', onPress: () => console.log('OK Pressed')},
+    ]);
   const renderBottomSheet = () => {
     return (
       <View>

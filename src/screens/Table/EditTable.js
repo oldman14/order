@@ -8,6 +8,7 @@ import {
   TextInput,
   Modal,
   Pressable,
+  Alert,
 } from 'react-native';
 import {SIZES} from '../../constants';
 import tableApi from '../../api/tableApi';
@@ -16,6 +17,9 @@ const {width, height} = SIZES;
 
 const EditTable = () => {
   const [tableList, setTableList] = useState(null);
+  const [dataTable, setDataTable] = useState({id: null, tableName: ''});
+  const [modalVisible, setModalVisible] = useState(false);
+  const [isDelete, setIsDelete] = useState(false);
   useEffect(() => {
     const getTableList = async () => {
       try {
@@ -27,23 +31,29 @@ const EditTable = () => {
     };
     getTableList();
   }, []);
-  const [dataTable, setDataTable] = useState({id: null, tableName: ''});
-  const [modalVisible, setModalVisible] = useState(false);
-  const [isDelete, setIsDelete] = useState(false);
+
   const renderEdit = item => {
     setDataTable(item);
     setModalVisible(!modalVisible);
   };
   const upDateTable = async () => {
-    setModalVisible(!modalVisible);
-    try {
-      const data = await tableApi.editTable(dataTable);
-      setTableList(data);
-      console.log(data);
-    } catch (error) {
-      console.log('Failed update table', error);
+    if (dataTable.tableName.length > 1) {
+      setModalVisible(!modalVisible);
+      try {
+        const data = await tableApi.editTable(dataTable);
+        setTableList(data);
+        console.log(data);
+      } catch (error) {
+        console.log('Failed update table', error);
+      }
+    } else {
+      createTwoButtonAlert();
     }
   };
+  const createTwoButtonAlert = () =>
+    Alert.alert('Cảnh báo', 'Không để trống tên bàn ', [
+      {text: 'OK', onPress: () => console.log('OK Pressed')},
+    ]);
   const renderDelete = item => {
     console.log('data delete', item);
     setIsDelete(!isDelete);
@@ -67,7 +77,9 @@ const EditTable = () => {
           onLongPress={() => renderDelete(item)}
           onPress={() => renderEdit(item)}>
           <View style={styles.tableItem}>
-            <Text style={{textAlign: 'center'}}>{item.tableName}</Text>
+            <Text style={{textAlign: 'center', fontSize: SIZES.body2}}>
+              {item.tableName}
+            </Text>
           </View>
         </TouchableOpacity>
       </View>
@@ -140,6 +152,7 @@ const styles = StyleSheet.create({
   },
   container: {
     marginHorizontal: (width * 0.1) / 8,
+    marginTop: (width * 0.1) / 6,
   },
   centeredView: {
     flex: 1,

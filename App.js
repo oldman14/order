@@ -1,5 +1,5 @@
 import React from 'react';
-import {View, Text} from 'react-native';
+import {View, Text, StatusBar} from 'react-native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {NavigationContainer, DefaultTheme} from '@react-navigation/native';
 import Tabs from './src/navigation/tabs';
@@ -14,6 +14,11 @@ const App = () => {
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
         <NavigationContainer>
+          <StatusBar
+            animated={true}
+            backgroundColor="#f90"
+            // showHideTransition={statusBarTransition}
+          />
           <Stack.Navigator
             screenOptions={{
               headerStyle: {

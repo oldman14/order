@@ -5,19 +5,29 @@ import {
   StyleSheet,
   TextInput,
   TouchableOpacity,
+  Alert,
 } from 'react-native';
 import {SIZES} from '../../constants';
 import tableApi from '../../api/tableApi';
 const AddTable = () => {
   const [text, setText] = useState((table = {tableName: ''}));
   const addTable = async () => {
-    try {
-      const data = await tableApi.addTable(text);
-      console.log(data);
-    } catch (error) {
-      console.log('Failed', error);
+    console.log('text.tableName,', text);
+    if (text.tableName.length) {
+      try {
+        const data = await tableApi.addTable(text);
+        console.log(data);
+      } catch (error) {
+        console.log('Failed', error);
+      }
+    } else {
+      createTwoButtonAlert();
     }
   };
+  const createTwoButtonAlert = () =>
+    Alert.alert('Cảnh báo', 'Không để trống tên bàn ', [
+      {text: 'OK', onPress: () => console.log('OK Pressed')},
+    ]);
 
   return (
     <View>
