@@ -24,6 +24,8 @@ import {
 import productApi from '../../api/productApi';
 import orderApi from '../../api/orderApi';
 import {data} from 'browserslist';
+import * as Progress from 'react-native-progress';
+
 import formatCurrency from '../component/formatCurrency';
 const Dish = ({route, navigation}) => {
   const {id, tableName} = route.params;
@@ -39,7 +41,7 @@ const Dish = ({route, navigation}) => {
   const dataCart = state.filter(item => item._id === id);
   const [totalPrice, settotalPrice] = useState(0);
   const [isOrder, setIsOrder] = useState(false);
-
+  const [isIndeterminate, setIsIndeterminate] = useState(false);
   const confirm = () => {
     setIsOrder(!isOrder);
     // addOrder(date, total);
@@ -61,12 +63,26 @@ const Dish = ({route, navigation}) => {
       settotalPrice(total);
     }
   }, [dataCart]);
+
   const addItem = () => {
     setQuantity(1);
     const time = new Date();
-    const minutes = time.getMinutes();
-    const hours = time.getHours();
-    const currentTime = hours + ':' + minutes;
+
+    const minutes = () => {
+      const minutes = time.getMinutes();
+      if (minutes < 10) {
+        return '0' + minutes;
+      }
+      return minutes;
+    };
+    const hours = () => {
+      const hours = time.getHours();
+      if (hours < 10) {
+        return '0' + hours;
+      }
+      return hours;
+    };
+    const currentTime = hours() + ':' + minutes();
     refRBSheet.current.close();
     const cart = {
       _id: id,
@@ -110,12 +126,12 @@ const Dish = ({route, navigation}) => {
     const obOrder = {
       total: totalPrice,
       listProduct: dataCart[0].listProduct,
-      date: currentdate,
       week: result,
     };
     try {
+      setIsIndeterminate(true);
       const dataOrder = await orderApi.addOrder(obOrder);
-      console.log(dataOrder);
+      setIsIndeterminate(false);
       deleteCart1();
       navigation.navigate('Home');
     } catch (error) {
@@ -391,27 +407,35 @@ const Dish = ({route, navigation}) => {
           </View>
         </View>
       </TouchableOpacity>
-      <Modal animationType="slide" transparent={true} visible={isOrder}>
-        <View style={styles.centeredView}>
-          <View style={styles.modalView}>
-            <Text style={styles.titleModal}>
-              Bạn không thể thay đổi đơn hàng khi đã xác nhận
-            </Text>
-            <View style={styles.btnView}>
-              <Pressable
-                style={[styles.button, styles.buttonClose]}
-                onPress={() => setIsOrder(!isOrder)}>
-                <Text style={styles.textStyle}>Hủy</Text>
-              </Pressable>
-              <Pressable
-                style={[styles.button, styles.buttonAccept]}
-                onPress={() => addOrder()}>
-                <Text style={styles.textStyle}>Xác nhận</Text>
-              </Pressable>
+      {isIndeterminate == false ? (
+        <Modal animationType="slide" transparent={true} visible={isOrder}>
+          <View style={styles.centeredView}>
+            <View style={styles.modalView}>
+              <Text style={styles.titleModal}>
+                Bạn không thể thay đổi đơn hàng khi đã xác nhận
+              </Text>
+              <View style={styles.btnView}>
+                <Pressable
+                  style={[styles.button, styles.buttonClose]}
+                  onPress={() => setIsOrder(!isOrder)}>
+                  <Text style={styles.textStyle}>Hủy</Text>
+                </Pressable>
+                <Pressable
+                  style={[styles.button, styles.buttonAccept]}
+                  onPress={() => addOrder()}>
+                  <Text style={styles.textStyle}>Xác nhận</Text>
+                </Pressable>
+              </View>
             </View>
           </View>
-        </View>
-      </Modal>
+        </Modal>
+      ) : (
+        <Progress.Circle
+          size={30}
+          style={{position: 'absolute', top: 100, left: 20}}
+          indeterminate={isIndeterminate}
+        />
+      )}
     </View>
   );
 };
@@ -519,7 +543,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 10,
     backgroundColor: '#f90',
     position: 'absolute',
-    bottom: 100,
+    bottom: 50,
     right: 0,
     left: 0,
     borderRadius: 3,
@@ -595,7 +619,7 @@ const styles = StyleSheet.create({
     height: 80,
     backgroundColor: '#f90',
     position: 'absolute',
-    bottom: 0,
+    bottom: 30,
     right: 0,
     left: 0,
     borderRadius: 3,

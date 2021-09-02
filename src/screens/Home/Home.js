@@ -1,14 +1,30 @@
 import React, {useEffect, useState} from 'react';
-import {View, Text, FlatList, StyleSheet, TouchableOpacity} from 'react-native';
+import {
+  View,
+  Text,
+  FlatList,
+  StyleSheet,
+  TouchableOpacity,
+  Button,
+} from 'react-native';
 import {Dimensions} from 'react-native';
 import productApi from '../../api/productApi';
 import tableApi from '../../api/tableApi';
 const {width, height} = Dimensions.get('window');
 import {useSelector} from 'react-redux';
 import {SIZES} from '../../constants';
+import PushNotification, {Importance} from 'react-native-push-notification';
+
 const Home = ({navigation}) => {
   const [tableList, setTableList] = useState(null);
   const state = useSelector(state => state.cart);
+  const testPush = () => {
+    PushNotification.localNotification({
+      channelId: 'channel-id',
+      title: 'My Notification Title', // (optional)
+      message: 'My Notification Message', // (required)
+    });
+  };
   useEffect(() => {
     const getTableList = async () => {
       try {
@@ -20,14 +36,33 @@ const Home = ({navigation}) => {
       }
     };
     getTableList();
+    const pushNoti = () => {
+      PushNotification.localNotificationSchedule({
+        //... You can use all the options from localNotifications
+        channelId: 'channel-id',
+        message: 'My Notification Message', // (required)
+        date: new Date(Date.now() + 10 * 1000), // in 60 secs
+        allowWhileIdle: true, // (optional) set notification to work while on doze, default: false
+
+        /* Android Only Properties */
+        repeatTime: 1, // (optional) Increment of configured repeatType. Check 'Repeating Notifications' section for more info.
+      });
+      console.log('on push noti');
+    };
+    pushNoti();
   }, []);
   console.log('log table list', tableList);
   const renderTable = ({item}) => {
     const isOrder = state.findIndex(itemId => itemId._id == item._id);
     return (
       <TouchableOpacity
-        onPress={() =>
-          navigation.navigate('Dish', {id: item._id, tableName: item.tableName})
+        onPress={
+          () =>
+            navigation.navigate('Dish', {
+              id: item._id,
+              tableName: item.tableName,
+            })
+          // testPush()
         }>
         <View>
           {isOrder >= 0 ? (
@@ -70,6 +105,9 @@ const Home = ({navigation}) => {
         keyExtractor={item => item._id}
         numColumns={3}
       />
+      <TouchableOpacity style={{width: 100, height: 30}}>
+        <Text>Test Push</Text>
+      </TouchableOpacity>
     </View>
   );
 };

@@ -42,7 +42,6 @@ const EditTable = () => {
       try {
         const data = await tableApi.editTable(dataTable);
         setTableList(data);
-        console.log(data);
       } catch (error) {
         console.log('Failed update table', error);
       }
@@ -60,7 +59,6 @@ const EditTable = () => {
     setDataTable(item);
   };
   const deleteTable = async () => {
-    console.log('dadataTabletaTable', dataTable);
     setIsDelete(!isDelete);
     try {
       let data = await tableApi.deleteTable(dataTable);

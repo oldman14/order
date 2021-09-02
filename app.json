@@ -1,4 +1,6 @@
 {
   "name": "Order",
-  "displayName": "Order"
+  "displayName": "Order",
+  "userInterfaceStyle": "automatic"
+
 }

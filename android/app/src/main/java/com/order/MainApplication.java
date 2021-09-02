@@ -10,6 +10,8 @@ import com.facebook.react.ReactPackage;
 import com.facebook.soloader.SoLoader;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
+import com.dieam.reactnativepushnotification.ReactNativePushNotificationPackage;  // notification
+
 //remainted
 import com.facebook.react.bridge.JSIModulePackage; // <- add
   import com.swmansion.reanimated.ReanimatedJSIModulePackage; // <- add

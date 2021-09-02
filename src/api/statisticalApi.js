@@ -10,5 +10,9 @@ const statisticalApi = {
     const url = `/statis/week`;
     return axiosClient.get(url, {params});
   },
+  getDay: params => {
+    const url = `statis/day`;
+    return axiosClient.get(url, {params});
+  },
 };
 export default statisticalApi;

@@ -15,6 +15,7 @@ const Setting = ({navigation}) => {
     var result = Math.ceil((currentdate.getDay() + 1 + numberOfDays) / 7);
     return result;
   };
+
   useEffect(() => {
     const getStatis = async () => {
       try {
@@ -96,6 +97,21 @@ const Setting = ({navigation}) => {
                 source={require('../../assets/images/icons8-menu-128.png')}
               />
               <Text style={styles.setting_title}>Chỉnh sửa thực đơn</Text>
+              <Image
+                style={styles.setting_arrow}
+                source={require('../../assets/images/icons8-chevron-right-60.png')}
+              />
+            </View>
+          </TouchableOpacity>
+        </View>
+        <View style={styles.setting}>
+          <TouchableOpacity onPress={() => navigation.navigate('Chart')}>
+            <View style={styles.setting_box}>
+              <Image
+                style={styles.setting_image}
+                source={require('../../assets/images/icons8-chart-50.png')}
+              />
+              <Text style={styles.setting_title}>Thống kê</Text>
               <Image
                 style={styles.setting_arrow}
                 source={require('../../assets/images/icons8-chevron-right-60.png')}
