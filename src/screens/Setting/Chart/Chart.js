@@ -12,10 +12,10 @@ import {PieChart} from 'react-native-chart-kit';
 import statisticalApi from '../../../api/statisticalApi';
 import {SIZES} from '../../../constants';
 import {LISTCOLORS} from '../../../constants/theme';
-import {nextDay, formatDate, nextDay1} from '../../component/formatDate';
+import {nextDay, formatDate, nextDay1} from '../../components/formatDate';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import * as Progress from 'react-native-progress';
-import formatCurrency from '../../component/formatCurrency';
+import formatCurrency from '../../components/formatCurrency';
 
 const Chart = () => {
   const [monthYear, setmonthYear] = useState();

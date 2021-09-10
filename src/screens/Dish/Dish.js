@@ -26,7 +26,7 @@ import orderApi from '../../api/orderApi';
 import {data} from 'browserslist';
 import * as Progress from 'react-native-progress';
 
-import formatCurrency from '../component/formatCurrency';
+import formatCurrency from '../components/formatCurrency';
 const Dish = ({route, navigation}) => {
   const {id, tableName} = route.params;
   console.log('tableName', tableName);

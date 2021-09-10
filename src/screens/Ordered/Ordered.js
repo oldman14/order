@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import {SIZES} from '../../constants';
 import {useSelector} from 'react-redux';
-import formatCurrency from '../component/formatCurrency';
+import formatCurrency from '../components/formatCurrency';
 import RBSheet from 'react-native-raw-bottom-sheet';
 const Ordered = () => {
   const state = useSelector(state => state.cart);

@@ -105,9 +105,6 @@ const Home = ({navigation}) => {
         keyExtractor={item => item._id}
         numColumns={3}
       />
-      <TouchableOpacity style={{width: 100, height: 30}}>
-        <Text>Test Push</Text>
-      </TouchableOpacity>
     </View>
   );
 };

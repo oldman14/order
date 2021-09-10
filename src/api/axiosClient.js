@@ -6,7 +6,7 @@ import {RN_APP_API_URL} from '@env';
 // Please have a look at here `https://github.com/axios/axios#request-config`
 
 const axiosClient = axios.create({
-  baseURL: RN_APP_API_URL,
+  baseURL: 'http://192.168.171.2:3000',
   headers: {
     'content-type': 'application/json',
   },
