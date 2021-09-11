@@ -14,7 +14,7 @@ const {width, height} = Dimensions.get('window');
 import {useSelector} from 'react-redux';
 import {SIZES} from '../../constants';
 import PushNotification, {Importance} from 'react-native-push-notification';
-
+import styles from './Style';
 const Home = ({navigation}) => {
   const [tableList, setTableList] = useState(null);
   const state = useSelector(state => state.cart);
@@ -36,21 +36,8 @@ const Home = ({navigation}) => {
       }
     };
     getTableList();
-    const pushNoti = () => {
-      PushNotification.localNotificationSchedule({
-        //... You can use all the options from localNotifications
-        channelId: 'channel-id',
-        message: 'My Notification Message', // (required)
-        date: new Date(Date.now() + 10 * 1000), // in 60 secs
-        allowWhileIdle: true, // (optional) set notification to work while on doze, default: false
-
-        /* Android Only Properties */
-        repeatTime: 1, // (optional) Increment of configured repeatType. Check 'Repeating Notifications' section for more info.
-      });
-      console.log('on push noti');
-    };
-    pushNoti();
   }, []);
+
   console.log('log table list', tableList);
   const renderTable = ({item}) => {
     const isOrder = state.findIndex(itemId => itemId._id == item._id);
@@ -108,49 +95,5 @@ const Home = ({navigation}) => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  tableItem: {
-    justifyContent: 'center',
-    width: width * 0.3,
-    height: width * 0.3,
-    backgroundColor: '#fff',
-    marginVertical: 5,
-    marginHorizontal: (width * 0.1) / 8,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-  tableItem2: {
-    justifyContent: 'center',
-    width: width * 0.3,
-    height: width * 0.3,
-    backgroundColor: '#f90',
-    marginVertical: 5,
-    marginHorizontal: (width * 0.1) / 8,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-  containerFlatList: {
-    marginHorizontal: (width * 0.1) / 8,
-    marginTop: (width * 0.1) / 8,
-  },
-  container: {
-    backgroundColor: '#eee',
-    width: SIZES.width,
-    height: SIZES.height,
-  },
-});
 
 export default Home;

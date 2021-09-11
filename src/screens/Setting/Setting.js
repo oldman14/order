@@ -13,6 +13,7 @@ import formatCurrency from '../components/formatCurrency';
 import {useDispatch} from 'react-redux';
 import {logout} from '../../../redux/actions/user';
 import {GoogleSignin} from '@react-native-google-signin/google-signin';
+import PushNotification from 'react-native-push-notification';
 const Setting = ({navigation}) => {
   const [totalDay, setTotalDay] = useState(0);
   const [totalWeek, setTotalWeek] = useState(0);
@@ -52,7 +53,6 @@ const Setting = ({navigation}) => {
           .split('T')[0]
           .replace('-', '/');
         const data = await statisticalApi.getAll({onDate: date});
-        console.log(data);
         setTotalDay(data);
       } catch (error) {
         console.log('Get date faile', error);
@@ -85,6 +85,24 @@ const Setting = ({navigation}) => {
       console.error(error);
     }
   };
+  const cancelNoti = () => {
+    PushNotification.cancelLocalNotification('123');
+    console.log('cancel noti');
+  };
+  const pushNoti = () => {
+    PushNotification.localNotificationSchedule({
+      //... You can use all the options from localNotifications
+      id: '123',
+      channelId: 'channel-id',
+      message: 'My Notification Message', // (required)
+      date: new Date(Date.now() + 5 * 1000), // in 60 secs
+      allowWhileIdle: true, // (optional) set notification to work while on doze, default: false
+      repeatType: 'time',
+      /* Android Only Properties */
+      repeatTime: 3000, // (optional) Increment of configured repeatType. Check 'Repeating Notifications' section for more info.
+    });
+    console.log('Push noti');
+  };
   return (
     <ScrollView>
       <View style={styles.container}>
@@ -104,8 +122,8 @@ const Setting = ({navigation}) => {
                 style={styles.box_image}
                 source={require('../../assets/images/icons8-last-24-hours-90.png')}
               />
-              <Text style={styles.box_title}>Tuần này</Text>
-              <Text style={styles.box_total}>{formatCurrency(totalWeek)}</Text>
+              <Text style={styles.box_title}>Tháng này</Text>
+              <Text style={styles.box_total}>{formatCurrency(987000)}</Text>
             </View>
           </View>
         </View>
@@ -169,19 +187,36 @@ const Setting = ({navigation}) => {
               </View>
             </TouchableOpacity>
           </View>
-          <View style={styles.setting}>
-            <View style={styles.setting_box}>
-              <Image
-                style={styles.setting_image}
-                source={require('../../assets/images/icons8-settings-50.png')}
-              />
-              <Text style={styles.setting_title}>Cài đặt</Text>
-              <Image
-                style={styles.setting_arrow}
-                source={require('../../assets/images/icons8-chevron-right-60.png')}
-              />
+          {/* <TouchableOpacity onPress={() => cancelNoti()}>
+            <View style={styles.setting}>
+              <View style={styles.setting_box}>
+                <Image
+                  style={styles.setting_image}
+                  source={require('../../assets/images/icons8-settings-50.png')}
+                />
+                <Text style={styles.setting_title}>Thông báo</Text>
+                <Image
+                  style={styles.setting_arrow}
+                  source={require('../../assets/images/icons8-chevron-right-60.png')}
+                />
+              </View>
             </View>
-          </View>
+          </TouchableOpacity> */}
+          <TouchableOpacity onPress={() => pushNoti()}>
+            <View style={styles.setting}>
+              <View style={styles.setting_box}>
+                <Image
+                  style={styles.setting_image}
+                  source={require('../../assets/images/icons8-settings-50.png')}
+                />
+                <Text style={styles.setting_title}>Cài đặt</Text>
+                <Image
+                  style={styles.setting_arrow}
+                  source={require('../../assets/images/icons8-chevron-right-60.png')}
+                />
+              </View>
+            </View>
+          </TouchableOpacity>
           <TouchableOpacity onPress={() => signOut()}>
             <View style={styles.setting}>
               <View style={styles.setting_box}>

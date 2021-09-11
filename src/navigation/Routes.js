@@ -2,6 +2,7 @@ import auth from '@react-native-firebase/auth';
 import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import React, {useEffect, useState} from 'react';
+import {StatusBar} from 'react-native';
 import AppStack from './AppStack';
 import AuthStack from './AuthStack';
 const Stack = createNativeStackNavigator();

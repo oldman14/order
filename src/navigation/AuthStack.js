@@ -8,7 +8,11 @@ const AuthStack = () => {
   console.log('AuthStack');
   return (
     <Stack.Navigator>
-      <Stack.Screen name="SignIn" component={SignInScreen} />
+      <Stack.Screen
+        options={{headerShown: false}}
+        name="SignIn"
+        component={SignInScreen}
+      />
     </Stack.Navigator>
   );
 };

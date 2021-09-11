@@ -56,16 +56,6 @@ const SignInScreen = ({navigation}) => {
     isSignedIn();
   }, []);
 
-  // const signOut = async () => {
-  //   console.log('logout');
-  //   try {
-  //     await GoogleSignin.signOut();
-  //     // useDispatch(logout());
-  //     setCurrentUser({currentUser: null, isLoged: false});
-  //   } catch (error) {
-  //     console.error(error);
-  //   }
-  // };
   const {colors} = useTheme();
   console.log('current', currentUser);
   const onGoogleButtonPress = async () => {
@@ -275,17 +265,20 @@ const SignInScreen = ({navigation}) => {
               </Text>
             </LinearGradient>
           </TouchableOpacity>
-          {/* <Button title="Google Sign-out" onPress={() => signOut()} /> */}
           <GoogleSigninButton
             style={{width: 192, height: 48}}
             size={GoogleSigninButton.Size.Wide}
             color={GoogleSigninButton.Color.Dark}
             onPress={() =>
-              onGoogleButtonPress().then(async () => {
-                const userInfo = await GoogleSignin.getCurrentUser();
-                setCurrentUser({currentUser: {userInfo}, isLoged: true});
-                dispatch(login({currentUser: {userInfo}, isLoged: true}));
-              })
+              onGoogleButtonPress()
+                .then(async () => {
+                  const userInfo = await GoogleSignin.getCurrentUser();
+                  setCurrentUser({currentUser: {userInfo}, isLoged: true});
+                  dispatch(login({currentUser: {userInfo}, isLoged: true}));
+                })
+                .catch(error => {
+                  console.log('Login failed', error);
+                })
             }
             disabled={currentUser.isLoged}
           />
@@ -296,72 +289,3 @@ const SignInScreen = ({navigation}) => {
 };
 
 export default SignInScreen;
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#ff9900',
-  },
-  header: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    paddingHorizontal: 20,
-    paddingBottom: 50,
-  },
-  footer: {
-    flex: 3,
-    backgroundColor: '#fff',
-    borderTopLeftRadius: 30,
-    borderTopRightRadius: 30,
-    paddingHorizontal: 20,
-    paddingVertical: 30,
-  },
-  text_header: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 30,
-  },
-  text_footer: {
-    color: '#05375a',
-    fontSize: 18,
-  },
-  action: {
-    flexDirection: 'row',
-    marginTop: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f2f2f2',
-    paddingBottom: 5,
-  },
-  actionError: {
-    flexDirection: 'row',
-    marginTop: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#FF0000',
-    paddingBottom: 5,
-  },
-  textInput: {
-    flex: 1,
-    marginTop: Platform.OS === 'ios' ? 0 : -12,
-    paddingLeft: 10,
-    color: '#05375a',
-  },
-  errorMsg: {
-    color: '#FF0000',
-    fontSize: 14,
-  },
-  button: {
-    alignItems: 'center',
-    marginTop: 50,
-  },
-  signIn: {
-    width: '100%',
-    height: 50,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderRadius: 10,
-  },
-  textSign: {
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-});

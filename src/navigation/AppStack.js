@@ -64,6 +64,7 @@ const AppStack = () => {
         name="Ordered"
         component={Ordered}
         options={{
+          title: 'Ordered',
           tabBarIcon: ({focused}) => (
             <MaterialCommunityIcons
               name="order-bool-descending-variant"
